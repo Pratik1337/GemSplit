@@ -16,7 +16,7 @@ env/
 ENV/
 .venv/
 .ENV/
-.env
+/temp_images
 
 # Ignore OS-specific files
 .DS_Store

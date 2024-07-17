@@ -68,7 +68,7 @@ def extract_json_from_response(response_text: str) -> dict:
     return json.loads(json_str)
 
 
-@router.post("/bill/")
+@router.post("/bill")
 async def upload_image(file: UploadFile = File(...)):
     try:
         temp_dir = "temp_images"

@@ -1,9 +1,5 @@
-from fastapi import FastAPI
-
-app = FastAPI()
 from fastapi import FastAPI, routing
 from gemai import router
-
 app = FastAPI()
 app.include_router(router)
 
