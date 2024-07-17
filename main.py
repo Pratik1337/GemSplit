@@ -8,6 +8,6 @@ app = FastAPI()
 app.include_router(router)
 
 
-@app.get("/")
+@app.get("/hello/gemsplit")
 def read_root():
-    return {"Hello": "World"}
+    return {"message": "Lets GoooooO!"}

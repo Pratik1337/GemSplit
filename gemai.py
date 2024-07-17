@@ -1,4 +1,3 @@
-import base64
 import json
 import os
 import shutil
@@ -7,12 +6,11 @@ import uuid
 from dotenv import load_dotenv
 import google.generativeai as genai
 from fastapi import APIRouter, UploadFile, File
-import requests
-from PIL import Image
-import io
-import re
+
 
 from starlette.responses import JSONResponse
+import prompts
+
 
 router = APIRouter(
     prefix='/api/v1/gemai',
@@ -27,49 +25,6 @@ api_key = os.environ.get('GOOGLE_API_KEY')
 genai.configure(api_key=api_key)
 
 
-BILL_IDENTIFICATION_PROMPT = """
-You are given an image of a restaurant bill. Your task is to analyze the bill and extract the following details: 
-  - List of items ordered
-  - Quantity of each item
-  - Price of each item
-  - Individual items amount, price multiplied by quantity for each item
-  - Total amount
-  - Any additional charges (tax, service charge, etc.)
-  - Date of the bill
-  - Name of the restaurant
-  - Type of item (food or alcohol)
-
-Please provide the extracted information in a structured JSON format as shown below:
-
-{
-  'restaurant_name': 'Example Restaurant',
-  'date': 'YYYY-MM-DD',
-  'items': [
-    {
-      'item_name': 'Item 1',
-      'quantity': 2,
-      'price': 10.00,
-      'amount': 20.00,
-      'item_type': 'Food'
-    },
-    {
-      'item_name': 'Item 2',
-      'quantity': 2,
-      'price': 5.00,
-      'amount': 10.00,
-      'item_type': 'Liquor'
-    }
-  ],
-  'additional_charges': {
-    'tax': 1.50,
-    'service_charge': 2.00
-  },
-  'total_amount': 23.50
-}
-
-If any of the details are not present on the bill, please indicate them as 'Not Available'. Ensure the data is accurate and clearly presented."
-Return a JSON object of your response, DO NOT prepend of append any text to the JSON
-"""
 
 # def image_url_to_byte_array(image_path):
 #     print("UPLOADING IMAGE ")
@@ -99,7 +54,7 @@ def generate_digital_bill(image_path, image_name):
 
     model = genai.GenerativeModel(model_name="models/gemini-1.5-flash")
 
-    response = model.generate_content([sample_file, BILL_IDENTIFICATION_PROMPT])
+    response = model.generate_content([sample_file, prompts.BILL_IDENTIFICATION_PROMPT])
 
     json_response = extract_json_from_response(response.text)
 
@@ -138,8 +93,4 @@ async def upload_image(file: UploadFile = File(...)):
         return JSONResponse(content={"message": "Bill image processed successfully", "data": response_object})
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
-
-
-
-
 
