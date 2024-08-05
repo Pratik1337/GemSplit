@@ -10,7 +10,7 @@ from fastapi import APIRouter, UploadFile, File
 
 from starlette.responses import JSONResponse
 import prompts
-
+from bill_processor.digital_bill_processor import DigitalBillProcessor
 
 router = APIRouter(
     prefix='/api/v1/gemai',
@@ -23,6 +23,8 @@ load_dotenv()
 api_key = os.environ.get('GOOGLE_API_KEY')
 
 genai.configure(api_key=api_key)
+
+dbp = DigitalBillProcessor()
 
 
 
@@ -86,7 +88,8 @@ async def upload_image(file: UploadFile = File(...)):
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        response_object = generate_digital_bill(file_path, new_filename)
+        uploaded_image_file = dbp.upload_image(file_path, new_filename)
+        response_object = dbp.generate_digital_bill(uploaded_image_file)
 
         os.remove(file_path)
 
