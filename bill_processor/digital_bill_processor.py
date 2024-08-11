@@ -30,5 +30,36 @@ class DigitalBillProcessor:
 
     def extract_json_from_response(self,response_text: str) -> dict:
         # Clean the JSON string
-        json_str = response_text.strip().replace("'", '"').replace('\n', '').replace('\t', '').replace('\r', '')
+        json_str = response_text.strip().replace("'", '"').replace('\n', '').replace('\t', '').replace('\r', '').replace("`", '')
         return json.loads(json_str)
+
+    def calculate_split(self, bill_prompt):
+        try:
+
+            print("BILL PROMPT COMBINED", bill_prompt)
+
+            # response = self.model.generate_content([bill_prompt])
+            response = self.model.generate_content(bill_prompt)
+            # json_response = self.extract_json_from_response(response.text)
+            return response.text
+
+            # json_response = self.extract_json_from_response(response.text)
+            #
+            # print("RESPONSE IS ", json_response)
+            # return json_response
+            # Check if the response object has the expected attributes
+            # if hasattr(response, 'text'):
+            #     # Extract JSON from the response text
+            #     json_response = self.extract_json_from_response(response.text)
+            #     print("Response JSON:", json_response)
+            #     return json_response
+            # else:
+            #     print("Unexpected response format:", response)
+            #     return None
+
+        except json.JSONDecodeError:
+            print("Invalid JSON input")
+            return {"error": "Invalid JSON input"}
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return {"error": str(e)}

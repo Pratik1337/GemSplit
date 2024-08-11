@@ -6,8 +6,7 @@ import uuid
 from dotenv import load_dotenv
 import google.generativeai as genai
 from fastapi import APIRouter, UploadFile, File
-
-
+from fastapi import Request
 from starlette.responses import JSONResponse
 import prompts
 from bill_processor.digital_bill_processor import DigitalBillProcessor
@@ -97,3 +96,23 @@ async def upload_image(file: UploadFile = File(...)):
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
+
+@router.post("/bill/calculate")
+async def print_data(request: Request):
+    try:
+        # Asynchronously get JSON data from request body
+        data = await request.json()
+        print("Received data:", data)
+        data_json = data['data']
+        print("DATA JSON",str(data_json))
+
+        combined_json = str(data_json) + "\n" + prompts.BILL_SPLIT_CUSTOM_REQUEST + "\n" + prompts.BILL_CALCULATION_PROMPT
+        result = dbp.calculate_split(combined_json)
+        # Return a response to confirm data receipt
+        # result = str(result)
+        # result = dbp.extract_json_from_response(result)
+        return JSONResponse(content={"message": "Data received successfully", "data": result})
+    except Exception as e:
+        # Handle exceptions that may occur during data retrieval and parsing
+        print(f"An error occurred: {e}")
+        return JSONResponse(content={"error": str(e)}, status_code=500)
